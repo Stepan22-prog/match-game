@@ -6,21 +6,30 @@ import './App.css'
 import Menu from './components/Menu/MainMenu';
 import Main from './components/Main';
 import { useState } from 'react';
+import CustomMenu from './components/Menu/CustomMenu';
 
 function App() {
-  const [isMainMenuOpen, setIsMainMenuOpen] = useState(true);
-  const [firstMove, setFirstMove] = useState('player')
+  const [screenState, setScreenState] = useState<'mainMenu' | 'customMenu' | 'game'>('mainMenu');
+  const [firstMove, setFirstMove] = useState('player');
+  const [gameState, setGameState] = useState({ total: 25, maxPerMove: 3 });
 
   function handleStartGame(mode: string) {
     setFirstMove(mode);
-    setIsMainMenuOpen(false);
+    setScreenState('game');
   }
 
-  const backToMainMenu = () => setIsMainMenuOpen(true);
+  const backToMainMenu = () => setScreenState('mainMenu');
+  const goToCustomMenu = () => setScreenState('customMenu');
+
+  function updateGameState(total: number, maxPerMove: number) {
+    setGameState({ total, maxPerMove });
+  }
 
   return (
     <>
-      {isMainMenuOpen ? <Menu handleStartGame={handleStartGame} /> : <Main backToMainMenu={backToMainMenu} firstMove={firstMove} />}
+      {screenState === "customMenu" && <CustomMenu setGameState={updateGameState} backToMainMenu={backToMainMenu} />}
+      {screenState === "mainMenu" && <Menu gameState={gameState} handleStartGame={handleStartGame} handleCustomMenuClick={goToCustomMenu} />}
+      {screenState === "game" && <Main gameState={gameState} backToMainMenu={backToMainMenu} firstMove={firstMove} />}
     </>
   )
 }

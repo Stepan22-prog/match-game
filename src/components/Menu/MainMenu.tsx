@@ -4,9 +4,11 @@ import { useState } from "react";
 
 type MainMenuType = {
   handleStartGame: (mode: string) => void;
+  handleCustomMenuClick: () => void;
+  gameState: { total: number, maxPerMove: number }
 }
 
-export default function MainMenu({ handleStartGame }: MainMenuType) {
+export default function MainMenu({ handleStartGame, handleCustomMenuClick, gameState }: MainMenuType) {
   const [gameMode, setGameMode] = useState("player");
 
   function handleStartClick() {
@@ -39,7 +41,7 @@ export default function MainMenu({ handleStartGame }: MainMenuType) {
         textAlign="left"
         mb={2}
       >
-        From the pile of 25 matches, each player takes either 1, 2 or 3 matches on each turn. The game is over once all matches are taken. Whoever has the even amount of matches wins.
+        From the pile of <b>{gameState.total}</b> matches, each player takes from 1 to <b>{gameState.maxPerMove}</b> matches on each turn. The game is over once all matches are taken. Whoever has the even amount of matches wins.
       </Typography>
       <Select 
         label="Who goes first?" 
@@ -53,6 +55,13 @@ export default function MainMenu({ handleStartGame }: MainMenuType) {
         sx={{ mt: 1 }}
         onClick={handleStartClick}
       >Play</Button>
+      <Button 
+        variant="contained"
+        color="secondary"
+        fullWidth
+        sx={{ mt: 1 }}
+        onClick={handleCustomMenuClick}
+      >Custom mode</Button>
     </Box>
   )
 }

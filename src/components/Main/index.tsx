@@ -2,37 +2,39 @@ import { Alert, Box, Typography, Button } from "@mui/material";
 import matchIcon from '../../assets/free-icon-match.png'
 import { useState } from "react";
 import { timeout } from "../../helpers/timeout";
-import { computerFirst, playerFirst } from "../../algorithm/algorihm";
+import { Algorithm } from "../../algorithm/algorihm";
 import TakenNumber from "../TakenNumber";
-import MatchButton from "../Buttons/MatchButton";
 import PauseMenu from "../Menu/PauseMenu";
 import GameOverMenu from "../Menu/GameOverMenu";
+import MatchPicker from "../MatchPicker";
 
 type MainType ={
   backToMainMenu: () => void;
   firstMove: string;
+  gameState: { total: number, maxPerMove: number };
 }
 
-export default function Main({ backToMainMenu, firstMove } : MainType) {
+export default function Main({ backToMainMenu, firstMove, gameState } : MainType) {
   const [turn, setTurn] = useState(firstMove);
-  const [matches, setMatches] = useState(25);
+  const [matches, setMatches] = useState(gameState.total);
   const [playerMatches, setPlayerMatches] = useState(0);
   const [playerTakenMatches, setPlayerTakenMatches] = useState<number | null>(null);
   const [computerMatches, setComputerMatches] = useState(0);
   const [computerTakenMatches, setComputerTakenMatches] = useState<number | null>(null);
   const [isPauseMenuOpen, setIsPauseMenuOpen] = useState(false);
   const [isGameOverMenuOpen, setIsGameOverMenuOpen] = useState<null | {winner: 'computer' | 'player'  | 'draw'}>(null);
+  const computerAlgorithm = new Algorithm(gameState.maxPerMove);
 
   function isGameOver(matches: number, computerMatches: number): boolean {
     if (matches === 0) {
-      if (computerMatches % 2 === 0 && playerMatches % 2 === 0) {
-        setIsGameOverMenuOpen({ winner: 'draw' });
-        return true;
-      }
-      if (computerMatches % 2 !== 0 && playerMatches % 2 !== 0) {
-        setIsGameOverMenuOpen({ winner: 'draw' });
-        return true;
-      }
+      // if (computerMatches % 2 === 0 && playerMatches % 2 === 0) {
+      //   setIsGameOverMenuOpen({ winner: 'draw' });
+      //   return true;
+      // }
+      // if (computerMatches % 2 !== 0 && playerMatches % 2 !== 0) {
+      //   setIsGameOverMenuOpen({ winner: 'draw' });
+      //   return true;
+      // }
       setIsGameOverMenuOpen({ 
         winner: (computerMatches % 2 === 0) ? 'computer' : 'player' 
       });
@@ -42,7 +44,7 @@ export default function Main({ backToMainMenu, firstMove } : MainType) {
   }
 
   async function computerMove(numberOfMatches: number) {
-    const takenNumber = firstMove === 'player' ? playerFirst(numberOfMatches, computerMatches) : computerFirst(numberOfMatches);
+    const takenNumber = computerAlgorithm.computerMove(numberOfMatches);
     const updatedNumberOfMatches = numberOfMatches - takenNumber 
     setMatches(updatedNumberOfMatches);
     setComputerTakenMatches(-takenNumber);
@@ -55,7 +57,7 @@ export default function Main({ backToMainMenu, firstMove } : MainType) {
     setTurn('player');
   }
 
-  if (firstMove === "computer" && matches === 25) {
+  if (firstMove === "computer" && matches === gameState.total) {
     computerMove(matches);
   }
   
@@ -78,7 +80,7 @@ export default function Main({ backToMainMenu, firstMove } : MainType) {
   const closeGameOverMenu = () => setIsGameOverMenuOpen(null);
   function restart(closeMenu: () => void) {
     setTurn('player');
-    setMatches(25);
+    setMatches(gameState.total);
     setPlayerMatches(0);
     setComputerMatches(0);
     closeMenu();
@@ -118,23 +120,12 @@ export default function Main({ backToMainMenu, firstMove } : MainType) {
         <TakenNumber number={playerTakenMatches} type="player" />
         <Box>
           <Typography variant="h6" sx={{ mb: 1 }}>Your matches: {playerMatches}</Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <MatchButton
-              disabled={turn === "computer"}
-              onClick={playerMove}
-              numberOfMatches={1}
-            />
-            <MatchButton
-              disabled={turn === "computer" || matches < 2}
-              onClick={playerMove}
-              numberOfMatches={2}
-            />
-            <MatchButton
-              disabled={turn === "computer" || matches < 3}
-              onClick={playerMove}
-              numberOfMatches={3}
-            />
-          </Box>
+          <MatchPicker 
+            maxPerMove={gameState.maxPerMove}
+            disabled={turn === "computer"}
+            remainingMatches={matches}
+            handlePlayerMove={playerMove}
+          />
         </Box>
       </Box>
       <PauseMenu 
