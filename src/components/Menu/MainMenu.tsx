@@ -2,8 +2,16 @@ import { Box, Button, Paper, Typography } from "@mui/material";
 import Select from "../Select";
 import { useState } from "react";
 
-export default function Menu() {
-  const [gameMode, setGameMode] = useState("Computer");
+type MainMenuType = {
+  handleStartGame: (mode: string) => void;
+}
+
+export default function MainMenu({ handleStartGame }: MainMenuType) {
+  const [gameMode, setGameMode] = useState("player");
+
+  function handleStartClick() {
+    handleStartGame(gameMode);
+  }
 
   return (
     <Box
@@ -37,12 +45,13 @@ export default function Menu() {
         label="Who goes first?" 
         value={gameMode} 
         setValue={setGameMode} 
-        items={["Computer", "You"]} 
+        items={["player", "computer"]} 
       />
       <Button 
         variant="contained" 
         fullWidth
         sx={{ mt: 1 }}
+        onClick={handleStartClick}
       >Play</Button>
     </Box>
   )
