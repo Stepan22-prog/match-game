@@ -1,7 +1,7 @@
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 
 type GameOverMenuType = {
-  winner: 'computer' | 'player';
+  winner: 'computer' | 'player' | 'draw';
   isOpen: boolean;
   handleRestart: () => void;
   handleBackToMenu: () => void;
@@ -11,16 +11,21 @@ export default function GameOverMenu({ winner, isOpen , handleRestart, handleBac
   return (
     <Dialog
       open={isOpen}
-      aria-labelledby="pause-menu-dialog-title"
-      aria-describedby="pause-menu-dialog-description"
+      aria-labelledby="game-over-menu-dialog-title"
     >
-      <DialogTitle id="pause-menu-dialog-title">
+      <DialogTitle id="game-over-menu-dialog-title">
         {"Game over | Match Game"}
       </DialogTitle>
       <DialogContent>
-        <Alert icon={false} severity={winner === "player" ? "success" : "error"}>
-          {winner === "player" ? "🧑You win! Congratulations!🙂" : "🖥️ Computer win. Try again!🙁"}
-        </Alert>
+        {winner === "draw" &&
+          <Alert icon={false} severity="info">🤝 Draw!</Alert>
+        }
+        {winner === "computer" &&
+          <Alert icon={false} severity="error">🖥️ Computer win. Try again!🙁</Alert>
+        }
+        {winner === "player" &&
+          <Alert icon={false} severity="success">🧑You win! Congratulations!🙂</Alert>
+        }
       </DialogContent>
       <DialogActions sx={{ display: 'flex', justifyContent: 'center' }}>
         <Button onClick={handleRestart}>

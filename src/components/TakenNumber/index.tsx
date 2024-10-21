@@ -1,11 +1,11 @@
 import { Box } from "@mui/material";
 
-type TakenNumber = {
+type TakenNumberType = {
   number: number | null;
   type: 'computer' | 'player';
 };
 
-export default function TakenNumber({ number, type } : TakenNumber) {
+export default function TakenNumber({ number, type } : TakenNumberType) {
   return (
     <Box
         sx={{

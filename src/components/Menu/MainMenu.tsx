@@ -3,16 +3,16 @@ import Select from "../Select";
 import { useState } from "react";
 
 type MainMenuType = {
-  handleStartGame: (mode: string) => void;
+  handleStartGame: (mode: 'computer' | 'player') => void;
   handleCustomMenuClick: () => void;
   gameState: { total: number, maxPerMove: number }
 }
 
 export default function MainMenu({ handleStartGame, handleCustomMenuClick, gameState }: MainMenuType) {
-  const [gameMode, setGameMode] = useState("player");
+  const [firstMove, setFirstMove] = useState<'computer' | 'player'>("player");
 
   function handleStartClick() {
-    handleStartGame(gameMode);
+    handleStartGame(firstMove);
   }
 
   return (
@@ -20,6 +20,7 @@ export default function MainMenu({ handleStartGame, handleCustomMenuClick, gameS
       padding={3}
       border="1px solid black"
       component={Paper}
+      elevation={3}
       maxWidth="500px"
     >
       <Typography 
@@ -45,8 +46,8 @@ export default function MainMenu({ handleStartGame, handleCustomMenuClick, gameS
       </Typography>
       <Select 
         label="Who goes first?" 
-        value={gameMode} 
-        setValue={setGameMode} 
+        value={firstMove} 
+        setValue={setFirstMove} 
         items={["player", "computer"]} 
       />
       <Button 
@@ -54,14 +55,18 @@ export default function MainMenu({ handleStartGame, handleCustomMenuClick, gameS
         fullWidth
         sx={{ mt: 1 }}
         onClick={handleStartClick}
-      >Play</Button>
+      >
+        Play
+      </Button>
       <Button 
         variant="contained"
         color="secondary"
         fullWidth
         sx={{ mt: 1 }}
         onClick={handleCustomMenuClick}
-      >Custom mode</Button>
+      >
+        Custom mode
+      </Button>
     </Box>
   )
 }

@@ -2,7 +2,7 @@ import { Alert, Box, Typography, Button } from "@mui/material";
 import matchIcon from '../../assets/free-icon-match.png'
 import { useState } from "react";
 import { timeout } from "../../helpers/timeout";
-import { Algorithm } from "../../algorithm/algorihm";
+import { Algorithm } from "../../algorithm/algorithm";
 import TakenNumber from "../TakenNumber";
 import PauseMenu from "../Menu/PauseMenu";
 import GameOverMenu from "../Menu/GameOverMenu";
@@ -10,77 +10,85 @@ import MatchPicker from "../MatchPicker";
 
 type MainType ={
   backToMainMenu: () => void;
-  firstMove: string;
+  firstMove: 'player' | 'computer';
   gameState: { total: number, maxPerMove: number };
 }
 
 export default function Main({ backToMainMenu, firstMove, gameState } : MainType) {
-  const [turn, setTurn] = useState(firstMove);
-  const [matches, setMatches] = useState(gameState.total);
-  const [playerMatches, setPlayerMatches] = useState(0);
+  const [turn, setTurn] = useState<'player' | 'computer'>(firstMove);
+  const [remainingMatches, setRemainingMatches] = useState<number>(gameState.total);
+  const [playerMatches, setPlayerMatches] = useState<number>(0);
   const [playerTakenMatches, setPlayerTakenMatches] = useState<number | null>(null);
   const [computerMatches, setComputerMatches] = useState(0);
   const [computerTakenMatches, setComputerTakenMatches] = useState<number | null>(null);
-  const [isPauseMenuOpen, setIsPauseMenuOpen] = useState(false);
-  const [isGameOverMenuOpen, setIsGameOverMenuOpen] = useState<null | {winner: 'computer' | 'player'  | 'draw'}>(null);
+  const [isPauseMenuOpen, setIsPauseMenuOpen] = useState<boolean>(false);
+  const [isGameOverMenuOpen, setIsGameOverMenuOpen] = useState<null | {winner: 'computer' | 'player' | 'draw'}>(null);
   const computerAlgorithm = new Algorithm(gameState.maxPerMove);
 
-  function isGameOver(matches: number, computerMatches: number): boolean {
-    if (matches === 0) {
-      // if (computerMatches % 2 === 0 && playerMatches % 2 === 0) {
-      //   setIsGameOverMenuOpen({ winner: 'draw' });
-      //   return true;
-      // }
-      // if (computerMatches % 2 !== 0 && playerMatches % 2 !== 0) {
-      //   setIsGameOverMenuOpen({ winner: 'draw' });
-      //   return true;
-      // }
+  function handleGameOver({ computerMatches, playerMatches }: {computerMatches: number, playerMatches: number}) {
+    const isBothPlayersHaveEven = computerMatches % 2 === 0 && playerMatches % 2 === 0;
+      const isBothPlayersHaveOdd = computerMatches % 2 !== 0 && playerMatches % 2 !== 0;
+      if (isBothPlayersHaveEven || isBothPlayersHaveOdd) {
+        setIsGameOverMenuOpen({ winner: 'draw' });
+        return;
+      }
       setIsGameOverMenuOpen({ 
         winner: (computerMatches % 2 === 0) ? 'computer' : 'player' 
       });
-      return true;
-    }
-    return false;
+  }
+  
+  function isGameOver(remainingMatches: number) {
+    return remainingMatches === 0; 
   }
 
   async function computerMove(numberOfMatches: number) {
     const takenNumber = computerAlgorithm.computerMove(numberOfMatches);
     const updatedNumberOfMatches = numberOfMatches - takenNumber 
-    setMatches(updatedNumberOfMatches);
+    setRemainingMatches(updatedNumberOfMatches);
     setComputerTakenMatches(-takenNumber);
     await timeout(800);
     setComputerTakenMatches(null);
-    setComputerMatches((prevNumber) => prevNumber + takenNumber);
-    if (isGameOver(updatedNumberOfMatches, computerMatches + takenNumber)) {
-      return;
+    setComputerMatches((prevNumber) => {
+      const newNumber = prevNumber + takenNumber
+      if (isGameOver(updatedNumberOfMatches)) {
+        handleGameOver({ computerMatches: newNumber, playerMatches });
+      }
+      return newNumber;
+    });
+    if (!isGameOver(updatedNumberOfMatches)) {
+      setTurn('player');
     }
-    setTurn('player');
   }
 
-  if (firstMove === "computer" && matches === gameState.total) {
-    computerMove(matches);
+  if (firstMove === "computer" && remainingMatches === gameState.total) {
+    computerMove(remainingMatches);
   }
   
   async function playerMove(numberOfMatches: number) {
-    const updatedNumberOfMatches = matches - numberOfMatches
-    setMatches(updatedNumberOfMatches);
+    const updatedNumberOfMatches = remainingMatches - numberOfMatches
+    setRemainingMatches(updatedNumberOfMatches);
     setPlayerTakenMatches(-numberOfMatches);
     setTurn('computer');
     await timeout(500);
     setPlayerTakenMatches(null);
-    setPlayerMatches((prevNumber) => prevNumber + numberOfMatches);
-    if (isGameOver(updatedNumberOfMatches, computerMatches)) {
-      return;
+    setPlayerMatches((prevNumber) => {
+      const newNumber = prevNumber + numberOfMatches
+      if (isGameOver(updatedNumberOfMatches)) {
+        handleGameOver({ computerMatches, playerMatches: newNumber });
+      }
+      return newNumber;
+    });
+    if (!isGameOver(updatedNumberOfMatches)) {
+      computerMove(updatedNumberOfMatches);
     }
-    computerMove(updatedNumberOfMatches);
   }
 
   const closePauseMenu = () => setIsPauseMenuOpen(false);
   const openPauseMenu = () => setIsPauseMenuOpen(true);
   const closeGameOverMenu = () => setIsGameOverMenuOpen(null);
   function restart(closeMenu: () => void) {
-    setTurn('player');
-    setMatches(gameState.total);
+    setTurn(firstMove);
+    setRemainingMatches(gameState.total);
     setPlayerMatches(0);
     setComputerMatches(0);
     closeMenu();
@@ -94,7 +102,7 @@ export default function Main({ backToMainMenu, firstMove, gameState } : MainType
         flexDirection: "column", 
         justifyContent: "space-between",
       }}>
-        <Box>
+        <Box textAlign="center">
           <Button onClick={openPauseMenu}>
             <Typography 
               variant="h4"
@@ -115,7 +123,7 @@ export default function Main({ backToMainMenu, firstMove, gameState } : MainType
             width={100}
             height={100}
           />
-          <Typography variant="h3" fontWeight={700}>{matches}</Typography>
+          <Typography variant="h3" fontWeight={700}>{remainingMatches}</Typography>
         </Box>
         <TakenNumber number={playerTakenMatches} type="player" />
         <Box>
@@ -123,7 +131,7 @@ export default function Main({ backToMainMenu, firstMove, gameState } : MainType
           <MatchPicker 
             maxPerMove={gameState.maxPerMove}
             disabled={turn === "computer"}
-            remainingMatches={matches}
+            remainingMatches={remainingMatches}
             handlePlayerMove={playerMove}
           />
         </Box>
@@ -136,7 +144,7 @@ export default function Main({ backToMainMenu, firstMove, gameState } : MainType
       />
       {!!isGameOverMenuOpen && <GameOverMenu
         isOpen={!!isGameOverMenuOpen}
-        winner={isGameOverMenuOpen?.winner}
+        winner={isGameOverMenuOpen.winner}
         handleRestart={() => restart(closeGameOverMenu)}
         handleBackToMenu={backToMainMenu}
       />}

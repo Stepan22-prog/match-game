@@ -1,15 +1,15 @@
 import { FormControl, InputLabel, Select as BasicSelect, MenuItem, SelectChangeEvent } from "@mui/material";
 
-type SelectProps = {
-  value: string;
-  setValue: (value: string) => void;
-  items: string[];
+type SelectProps<T extends string> = {
+  value: T;
+  setValue: (value: T) => void;
+  items: T[];
   label: string;
 }
 
-export default function Select({ label, value, setValue, items } : SelectProps) {
+export default function Select<T extends string>({ label, value, setValue, items } : SelectProps<T>) {
   const handleChange = (event: SelectChangeEvent) => {
-    setValue(event.target.value as string);
+    setValue(event.target.value as T);
   };
 
   return (

@@ -1,5 +1,5 @@
-import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import { useState } from "react";
+import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 
 type CustomMenuType = {
   setGameState: (total: number, maxPerMove: number) => void;
@@ -10,7 +10,7 @@ export default function CustomMenu({ setGameState, backToMainMenu } : CustomMenu
   const [maxPerMove, setMaxPerMove] = useState({ value: 3, error: false });
   const [total, setTotal] = useState({ value: 25, error: false });
 
-  function handleMaxPerMoveInputType(value: string) {
+  function handleMaxPerMoveInputChange(value: string) {
     if (!+value || +value > (total.value / 2)) {
       setMaxPerMove({ value: 3, error: true });
       return;
@@ -18,7 +18,7 @@ export default function CustomMenu({ setGameState, backToMainMenu } : CustomMenu
     setMaxPerMove({ value: +value, error: false });
   }
 
-  function handleTotalInputType(value: string) {
+  function handleTotalInputChange(value: string) {
     if (!+value) {
       setTotal({ value: 25, error: true });
       return;
@@ -42,6 +42,7 @@ export default function CustomMenu({ setGameState, backToMainMenu } : CustomMenu
       padding={3}
       border="1px solid black"
       component={Paper}
+      elevation={3}
       maxWidth="500px"
     >
       <Typography 
@@ -80,7 +81,7 @@ export default function CustomMenu({ setGameState, backToMainMenu } : CustomMenu
           variant="outlined" 
           size="small" 
           sx={{ width: '60px', mr: 1}}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleTotalInputType(event.target.value)}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleTotalInputChange(event.target.value)}
         />
         <TextField
           error={maxPerMove.error}
@@ -88,7 +89,7 @@ export default function CustomMenu({ setGameState, backToMainMenu } : CustomMenu
           variant="outlined" 
           size="small" 
           sx={{ width: '60px'}} 
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleMaxPerMoveInputType(event.target.value)}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleMaxPerMoveInputChange(event.target.value)}
         />
       </Box>
       <Button 
@@ -96,19 +97,25 @@ export default function CustomMenu({ setGameState, backToMainMenu } : CustomMenu
         fullWidth
         sx={{ mt: 1 }}
         onClick={handleSave}
-      >Save</Button>
+      >
+        Save
+      </Button>
       <Button 
         variant="contained"
         color="warning"
         fullWidth
         sx={{ mt: 1 }}
         onClick={resetToDefault}
-      >Reset to default</Button>
+      >
+        Reset to default
+      </Button>
       <Button 
         fullWidth
         sx={{ mt: 1 }}
         onClick={backToMainMenu}
-      >Back to main menu</Button>
+      >
+        Back to main menu
+      </Button>
     </Box>
   )
 }

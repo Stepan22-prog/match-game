@@ -1,19 +1,19 @@
+import { useState } from 'react';
+import Menu from './components/Menu/MainMenu';
+import Main from './components/Main';
+import CustomMenu from './components/Menu/CustomMenu';
+
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import './App.css'
-import Menu from './components/Menu/MainMenu';
-import Main from './components/Main';
-import { useState } from 'react';
-import CustomMenu from './components/Menu/CustomMenu';
 
 function App() {
   const [screenState, setScreenState] = useState<'mainMenu' | 'customMenu' | 'game'>('mainMenu');
-  const [firstMove, setFirstMove] = useState('player');
-  const [gameState, setGameState] = useState({ total: 25, maxPerMove: 3 });
+  const [firstMove, setFirstMove] = useState<'computer' | 'player'>('player');
+  const [gameState, setGameState] = useState<{ total: number, maxPerMove: number }>({ total: 25, maxPerMove: 3 });
 
-  function handleStartGame(mode: string) {
+  function handleStartGame(mode: 'computer' | 'player') {
     setFirstMove(mode);
     setScreenState('game');
   }
@@ -28,8 +28,20 @@ function App() {
   return (
     <>
       {screenState === "customMenu" && <CustomMenu setGameState={updateGameState} backToMainMenu={backToMainMenu} />}
-      {screenState === "mainMenu" && <Menu gameState={gameState} handleStartGame={handleStartGame} handleCustomMenuClick={goToCustomMenu} />}
-      {screenState === "game" && <Main gameState={gameState} backToMainMenu={backToMainMenu} firstMove={firstMove} />}
+      {screenState === "mainMenu" && 
+        <Menu 
+          gameState={gameState} 
+          handleStartGame={handleStartGame} 
+          handleCustomMenuClick={goToCustomMenu}
+        />
+      }
+      {screenState === "game" && 
+        <Main 
+          gameState={gameState} 
+          backToMainMenu={backToMainMenu} 
+          firstMove={firstMove}
+        />
+      }
     </>
   )
 }
