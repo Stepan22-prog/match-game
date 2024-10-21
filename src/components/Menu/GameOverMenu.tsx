@@ -14,7 +14,7 @@ export default function GameOverMenu({ winner, isOpen , handleRestart, handleBac
       aria-labelledby="game-over-menu-dialog-title"
     >
       <DialogTitle id="game-over-menu-dialog-title">
-        {"Game over | Match Game"}
+        {"Game over | The Match Game"}
       </DialogTitle>
       <DialogContent>
         {winner === "draw" &&

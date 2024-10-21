@@ -27,7 +27,12 @@ function App() {
 
   return (
     <>
-      {screenState === "customMenu" && <CustomMenu setGameState={updateGameState} backToMainMenu={backToMainMenu} />}
+      {screenState === "customMenu" && 
+        <CustomMenu 
+          setGameState={updateGameState} 
+          backToMainMenu={backToMainMenu}
+          gameState={gameState} 
+        />}
       {screenState === "mainMenu" && 
         <Menu 
           gameState={gameState} 

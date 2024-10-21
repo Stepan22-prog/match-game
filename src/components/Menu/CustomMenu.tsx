@@ -4,15 +4,16 @@ import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 type CustomMenuType = {
   setGameState: (total: number, maxPerMove: number) => void;
   backToMainMenu: () => void;
+  gameState: { total: number, maxPerMove: number }
 }
 
-export default function CustomMenu({ setGameState, backToMainMenu } : CustomMenuType) {
-  const [maxPerMove, setMaxPerMove] = useState({ value: 3, error: false });
-  const [total, setTotal] = useState({ value: 25, error: false });
+export default function CustomMenu({ setGameState, backToMainMenu, gameState } : CustomMenuType) {
+  const [maxPerMove, setMaxPerMove] = useState({ value: gameState.maxPerMove, error: false });
+  const [total, setTotal] = useState({ value: gameState.total, error: false });
 
   function handleMaxPerMoveInputChange(value: string) {
     if (!+value || +value > (total.value / 2)) {
-      setMaxPerMove({ value: 3, error: true });
+      setMaxPerMove({ value: gameState.maxPerMove, error: true });
       return;
     }
     setMaxPerMove({ value: +value, error: false });
@@ -20,7 +21,7 @@ export default function CustomMenu({ setGameState, backToMainMenu } : CustomMenu
 
   function handleTotalInputChange(value: string) {
     if (!+value) {
-      setTotal({ value: 25, error: true });
+      setTotal({ value: gameState.total, error: true });
       return;
     }
     setTotal({ value: (+value) * 2 + 1, error: false });
@@ -50,7 +51,7 @@ export default function CustomMenu({ setGameState, backToMainMenu } : CustomMenu
         component="h1"
         mb={1}
       >
-        Match Game
+        The Match Game
       </Typography>
       <Typography 
         variant="h6" 

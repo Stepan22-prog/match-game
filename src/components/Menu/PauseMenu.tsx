@@ -16,7 +16,7 @@ export default function PauseMenu({ isOpen, handleClose, handleRestart, handleBa
       aria-describedby="pause-menu-dialog-description"
     >
       <DialogTitle id="pause-menu-dialog-title">
-        {"Pause | Match Game"}
+        {"Pause | The Match Game"}
       </DialogTitle>
       <DialogActions sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
         <Button onClick={handleClose}>Continue</Button>

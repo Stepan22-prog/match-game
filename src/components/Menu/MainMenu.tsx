@@ -28,7 +28,7 @@ export default function MainMenu({ handleStartGame, handleCustomMenuClick, gameS
         component="h1"
         mb={1}
       >
-        Match Game
+        The Match Game
       </Typography>
       <Typography 
         variant="h6" 

@@ -14,10 +14,10 @@ export default function Select<T extends string>({ label, value, setValue, items
 
   return (
     <FormControl fullWidth size="small">
-        <InputLabel id="demo-simple-select-label">{label}</InputLabel>
+        <InputLabel id="select-label">{label}</InputLabel>
         <BasicSelect
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
+          labelId="select-label"
+          id="select"
           value={value}
           label={label}
           onChange={handleChange}
