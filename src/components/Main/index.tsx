@@ -16,7 +16,6 @@ type MainType ={
 
 export default function Main({ backToMainMenu, firstMove, gameState } : MainType) {
   const [turn, setTurn] = useState<'player' | 'computer'>(firstMove);
-  const [remainingMatches, setRemainingMatches] = useState<number>(gameState.total);
   const [playerMatches, setPlayerMatches] = useState<number>(0);
   const [playerTakenMatches, setPlayerTakenMatches] = useState<number | null>(null);
   const [computerMatches, setComputerMatches] = useState(0);
@@ -24,6 +23,7 @@ export default function Main({ backToMainMenu, firstMove, gameState } : MainType
   const [isPauseMenuOpen, setIsPauseMenuOpen] = useState<boolean>(false);
   const [isGameOverMenuOpen, setIsGameOverMenuOpen] = useState<null | {winner: 'computer' | 'player' | 'draw'}>(null);
   const computerAlgorithm = new Algorithm(gameState.maxPerMove);
+  const remainingMatches = gameState.total - (playerMatches + computerMatches);
 
   function handleGameOver({ computerMatches, playerMatches }: {computerMatches: number, playerMatches: number}) {
     const isBothPlayersHaveEven = computerMatches % 2 === 0 && playerMatches % 2 === 0;
@@ -43,8 +43,7 @@ export default function Main({ backToMainMenu, firstMove, gameState } : MainType
 
   async function computerMove(numberOfMatches: number) {
     const takenNumber = computerAlgorithm.computerMove(numberOfMatches);
-    const updatedNumberOfMatches = numberOfMatches - takenNumber 
-    setRemainingMatches(updatedNumberOfMatches);
+    const updatedNumberOfMatches = numberOfMatches - takenNumber;
     setComputerTakenMatches(-takenNumber);
     await timeout(800);
     setComputerTakenMatches(null);
@@ -65,8 +64,7 @@ export default function Main({ backToMainMenu, firstMove, gameState } : MainType
   }
   
   async function playerMove(numberOfMatches: number) {
-    const updatedNumberOfMatches = remainingMatches - numberOfMatches
-    setRemainingMatches(updatedNumberOfMatches);
+    const updatedNumberOfMatches = remainingMatches - numberOfMatches;
     setPlayerTakenMatches(-numberOfMatches);
     setTurn('computer');
     await timeout(500);
@@ -88,7 +86,6 @@ export default function Main({ backToMainMenu, firstMove, gameState } : MainType
   const closeGameOverMenu = () => setIsGameOverMenuOpen(null);
   function restart(closeMenu: () => void) {
     setTurn(firstMove);
-    setRemainingMatches(gameState.total);
     setPlayerMatches(0);
     setComputerMatches(0);
     closeMenu();
