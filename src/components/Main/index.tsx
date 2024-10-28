@@ -7,15 +7,15 @@ import TakenNumber from "../TakenNumber";
 import PauseMenu from "../Menu/PauseMenu";
 import GameOverMenu from "../Menu/GameOverMenu";
 import MatchPicker from "../MatchPicker";
+import { GameState } from "../../hooks/useGame";
 
 type MainType ={
   backToMainMenu: () => void;
-  firstMove: 'player' | 'computer';
-  gameState: { total: number, maxPerMove: number };
+  gameState: GameState;
 }
 
-export default function Main({ backToMainMenu, firstMove, gameState } : MainType) {
-  const [turn, setTurn] = useState<'player' | 'computer'>(firstMove);
+export default function Main({ backToMainMenu, gameState } : MainType) {
+  const [turn, setTurn] = useState<'player' | 'computer'>(gameState.firstMove);
   const [playerMatches, setPlayerMatches] = useState<number>(0);
   const [playerTakenMatches, setPlayerTakenMatches] = useState<number | null>(null);
   const [computerMatches, setComputerMatches] = useState(0);
@@ -59,7 +59,7 @@ export default function Main({ backToMainMenu, firstMove, gameState } : MainType
     }
   }
 
-  if (firstMove === "computer" && remainingMatches === gameState.total) {
+  if (gameState.firstMove === "computer" && remainingMatches === gameState.total) {
     computerMove(remainingMatches);
   }
   
@@ -85,7 +85,7 @@ export default function Main({ backToMainMenu, firstMove, gameState } : MainType
   const openPauseMenu = () => setIsPauseMenuOpen(true);
   const closeGameOverMenu = () => setIsGameOverMenuOpen(null);
   function restart(closeMenu: () => void) {
-    setTurn(firstMove);
+    setTurn(gameState.firstMove);
     setPlayerMatches(0);
     setComputerMatches(0);
     closeMenu();

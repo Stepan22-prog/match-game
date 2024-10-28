@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import Menu from './components/Menu/MainMenu';
 import Main from './components/Main';
 import CustomMenu from './components/Menu/CustomMenu';
@@ -8,47 +7,42 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
+import { useScreenState } from './hooks/useScreenState';
+import { useGame } from './hooks/useGame';
+
 function App() {
-  const [screenState, setScreenState] = useState<'mainMenu' | 'customMenu' | 'game'>('mainMenu');
-  const [firstMove, setFirstMove] = useState<'computer' | 'player'>('player');
-  const [gameState, setGameState] = useState<{ total: number, maxPerMove: number }>({ total: 25, maxPerMove: 3 });
+  const { screenState, goToMainMenu, goToCustomMenu, goToGameScreen } = useScreenState();
+  const { gameState, setNumberOfMatches, setFirstMove } = useGame();
 
-  function handleStartGame(mode: 'computer' | 'player') {
+  const handleStartGame = (mode: 'computer' | 'player') => {
     setFirstMove(mode);
-    setScreenState('game');
-  }
-
-  const backToMainMenu = () => setScreenState('mainMenu');
-  const goToCustomMenu = () => setScreenState('customMenu');
-
-  function updateGameState(total: number, maxPerMove: number) {
-    setGameState({ total, maxPerMove });
-  }
+    goToGameScreen();
+  };
 
   return (
     <>
-      {screenState === "customMenu" && 
-        <CustomMenu 
-          setGameState={updateGameState} 
-          backToMainMenu={backToMainMenu}
-          gameState={gameState} 
-        />}
-      {screenState === "mainMenu" && 
-        <Menu 
-          gameState={gameState} 
-          handleStartGame={handleStartGame} 
+      {screenState === 'customMenu' && (
+        <CustomMenu
+          setGameState={setNumberOfMatches}
+          backToMainMenu={goToMainMenu}
+          gameState={gameState}
+        />
+      )}
+      {screenState === 'mainMenu' && (
+        <Menu
+          gameState={gameState}
+          handleStartGame={handleStartGame}
           handleCustomMenuClick={goToCustomMenu}
         />
-      }
-      {screenState === "game" && 
-        <Main 
-          gameState={gameState} 
-          backToMainMenu={backToMainMenu} 
-          firstMove={firstMove}
+      )}
+      {screenState === 'game' && (
+        <Main
+          gameState={gameState}
+          backToMainMenu={goToMainMenu}
         />
-      }
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
