@@ -1,131 +1,86 @@
-import { Alert, Box, Typography, Button } from "@mui/material";
-import matchIcon from '../../assets/free-icon-match.png'
-import { useState } from "react";
-import { timeout } from "../../helpers/timeout";
-import { Algorithm } from "../../algorithm/algorithm";
-import TakenNumber from "../TakenNumber";
+import { Box, Typography, Button, Alert } from "@mui/material";
+import matchIcon from '../../assets/free-icon-match.png';
 import PauseMenu from "../Menu/PauseMenu";
 import GameOverMenu from "../Menu/GameOverMenu";
 import MatchPicker from "../MatchPicker";
+import TakenNumber from "../TakenNumber";
+import { useTurns } from "./hooks/useTurn";
+import { usePlayerAndComputerMoves } from "./hooks/usePlayerAndComputerMoves";
+import { useGameMenus } from "./hooks/useGameMenus";
 import { GameState } from "../../hooks/useGame";
 
-type MainType ={
+type MainType = {
   backToMainMenu: () => void;
   gameState: GameState;
-}
+};
 
-export default function Main({ backToMainMenu, gameState } : MainType) {
-  const [turn, setTurn] = useState<'player' | 'computer'>(gameState.firstMove);
-  const [playerMatches, setPlayerMatches] = useState<number>(0);
-  const [playerTakenMatches, setPlayerTakenMatches] = useState<number | null>(null);
-  const [computerMatches, setComputerMatches] = useState(0);
-  const [computerTakenMatches, setComputerTakenMatches] = useState<number | null>(null);
-  const [isPauseMenuOpen, setIsPauseMenuOpen] = useState<boolean>(false);
-  const [isGameOverMenuOpen, setIsGameOverMenuOpen] = useState<null | {winner: 'computer' | 'player' | 'draw'}>(null);
-  const computerAlgorithm = new Algorithm(gameState.maxPerMove);
-  const remainingMatches = gameState.total - (playerMatches + computerMatches);
+export default function Main({ backToMainMenu, gameState }: MainType) {
+  const { turn, switchTurn } = useTurns(gameState);
+  const {
+    playerMatches,
+    computerMatches,
+    playerMove,
+    computerMove,
+    playerTakenMatches,
+    computerTakenMatches,
+    remainingMatches,
+  } = usePlayerAndComputerMoves(gameState, handleGameOver);
 
-  function handleGameOver({ computerMatches, playerMatches }: {computerMatches: number, playerMatches: number}) {
-    const isBothPlayersHaveEven = computerMatches % 2 === 0 && playerMatches % 2 === 0;
-      const isBothPlayersHaveOdd = computerMatches % 2 !== 0 && playerMatches % 2 !== 0;
-      if (isBothPlayersHaveEven || isBothPlayersHaveOdd) {
-        setIsGameOverMenuOpen({ winner: 'draw' });
-        return;
-      }
-      setIsGameOverMenuOpen({ 
-        winner: (computerMatches % 2 === 0) ? 'computer' : 'player' 
-      });
+  const {
+    isPauseMenuOpen,
+    openPauseMenu,
+    closePauseMenu,
+    isGameOverMenuOpen,
+    openGameOverMenu,
+    closeGameOverMenu,
+  } = useGameMenus();
+
+  function handleGameOver({ computerMatches, playerMatches }: { computerMatches: number; playerMatches: number }) {
+    const isDraw = computerMatches % 2 === playerMatches % 2;
+    openGameOverMenu(isDraw ? 'draw' : computerMatches % 2 === 0 ? 'computer' : 'player');
   }
-  
-  function isGameOver(remainingMatches: number) {
-    return remainingMatches === 0; 
-  }
 
-  async function computerMove(numberOfMatches: number) {
-    const takenNumber = computerAlgorithm.computerMove(numberOfMatches);
-    const updatedNumberOfMatches = numberOfMatches - takenNumber;
-    setComputerTakenMatches(-takenNumber);
-    await timeout(800);
-    setComputerTakenMatches(null);
-    setComputerMatches((prevNumber) => {
-      const newNumber = prevNumber + takenNumber
-      if (isGameOver(updatedNumberOfMatches)) {
-        handleGameOver({ computerMatches: newNumber, playerMatches });
-      }
-      return newNumber;
-    });
-    if (!isGameOver(updatedNumberOfMatches)) {
-      setTurn('player');
-    }
+  function restart(closeMenu: () => void) {
+    switchTurn();
+    closeMenu();
   }
 
   if (gameState.firstMove === "computer" && remainingMatches === gameState.total) {
-    computerMove(remainingMatches);
-  }
-  
-  async function playerMove(numberOfMatches: number) {
-    const updatedNumberOfMatches = remainingMatches - numberOfMatches;
-    setPlayerTakenMatches(-numberOfMatches);
-    setTurn('computer');
-    await timeout(500);
-    setPlayerTakenMatches(null);
-    setPlayerMatches((prevNumber) => {
-      const newNumber = prevNumber + numberOfMatches
-      if (isGameOver(updatedNumberOfMatches)) {
-        handleGameOver({ computerMatches, playerMatches: newNumber });
-      }
-      return newNumber;
-    });
-    if (!isGameOver(updatedNumberOfMatches)) {
-      computerMove(updatedNumberOfMatches);
-    }
-  }
-
-  const closePauseMenu = () => setIsPauseMenuOpen(false);
-  const openPauseMenu = () => setIsPauseMenuOpen(true);
-  const closeGameOverMenu = () => setIsGameOverMenuOpen(null);
-  function restart(closeMenu: () => void) {
-    setTurn(gameState.firstMove);
-    setPlayerMatches(0);
-    setComputerMatches(0);
-    closeMenu();
+    computerMove();
   }
 
   return (
     <>
-      <Box sx={{ 
-        height: '85vh', 
-        display: "flex",
-        flexDirection: "column", 
-        justifyContent: "space-between",
-      }}>
+      <Box
+        sx={{
+          height: '85vh',
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
         <Box textAlign="center">
           <Button onClick={openPauseMenu}>
-            <Typography 
-              variant="h4"
-            >
-              ⏸️
-            </Typography>
+            <Typography variant="h4">⏸️</Typography>
           </Button>
           <Alert icon={false} severity={turn === "player" ? "success" : "error"}>
             {turn === "player" ? "🧑 Your turn" : "🖥️ Computer turn"}
           </Alert>
-          <Typography variant="h6" sx={{ mt: 1 }}>Computer matches: {computerMatches}</Typography>
+          <Typography variant="h6" sx={{ mt: 1 }}>
+            Computer matches: {computerMatches}
+          </Typography>
         </Box>
         <TakenNumber number={computerTakenMatches} type="computer" />
         <Box display="flex" alignItems="center">
-          <img
-            src={matchIcon}
-            alt="Match"
-            width={100}
-            height={100}
-          />
+          <img src={matchIcon} alt="Match" width={100} height={100} />
           <Typography variant="h3" fontWeight={700}>{remainingMatches}</Typography>
         </Box>
         <TakenNumber number={playerTakenMatches} type="player" />
         <Box>
-          <Typography variant="h6" sx={{ mb: 1 }}>Your matches: {playerMatches}</Typography>
-          <MatchPicker 
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            Your matches: {playerMatches}
+          </Typography>
+          <MatchPicker
             maxPerMove={gameState.maxPerMove}
             disabled={turn === "computer"}
             remainingMatches={remainingMatches}
@@ -133,18 +88,20 @@ export default function Main({ backToMainMenu, gameState } : MainType) {
           />
         </Box>
       </Box>
-      <PauseMenu 
-        isOpen={isPauseMenuOpen} 
-        handleClose={closePauseMenu} 
+      <PauseMenu
+        isOpen={isPauseMenuOpen}
+        handleClose={closePauseMenu}
         handleRestart={() => restart(closePauseMenu)}
         handleBackToMenu={backToMainMenu}
       />
-      {!!isGameOverMenuOpen && <GameOverMenu
-        isOpen={!!isGameOverMenuOpen}
-        winner={isGameOverMenuOpen.winner}
-        handleRestart={() => restart(closeGameOverMenu)}
-        handleBackToMenu={backToMainMenu}
-      />}
+      {!!isGameOverMenuOpen && (
+        <GameOverMenu
+          isOpen={!!isGameOverMenuOpen}
+          winner={isGameOverMenuOpen.winner}
+          handleRestart={() => restart(closeGameOverMenu)}
+          handleBackToMenu={backToMainMenu}
+        />
+      )}
     </>
-  )
+  );
 }
